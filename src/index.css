@@ -344,7 +344,14 @@ html[data-body-align="right"] .story { text-align: right; }
 .socials { display: flex; flex-wrap: wrap; gap: 10px; }
 html[data-footer="contained"] .footer { width: min(var(--wrap), calc(100% - 36px)); margin: 28px auto 18px; border-radius: 16px; border-top: 0; }
 
-.ad-slot { margin: 12px auto; overflow: hidden; display: grid; place-items: center; color: var(--muted); }
+.region { position: relative; }
+.region.drop-before { box-shadow: inset 0 4px 0 var(--ember); }
+.region.drop-after { box-shadow: inset 0 -4px 0 var(--ember); }
+.ad-slot { margin: 12px auto; overflow: hidden; display: grid; place-items: center; color: var(--muted); background: color-mix(in srgb, var(--paper) 92%, var(--ember)); }
+.ad-slot.is-editing { position: relative; cursor: grab; touch-action: none; border: 2px dashed var(--ember); text-align: center; padding: 28px 16px; }
+.ad-slot.is-dragging { cursor: grabbing; }
+.ad-label { position: absolute; top: 8px; left: 10px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.ad-resize { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; cursor: nwse-resize; background: var(--ember); border-radius: 8px 0 0 0; }
 .ad-fill, .ad-fill > div { width: 100%; height: 100%; }
 .ad-fill iframe, .ad-fill img, .ad-fill ins { width: 100% !important; height: 100% !important; max-width: 100%; }
 

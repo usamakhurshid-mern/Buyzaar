@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCatalog } from "../catalog/context";
-import { pageOptions } from "../data/ads";
+import { pageKey, pageOptions } from "../data/ads";
 import { adPlaces, footerDesigns, headerDesigns } from "../data/chrome";
 import { defaultContent } from "../data/defaultContent";
 import { fontFamilies, fontRoles, normalizeFonts } from "../data/fonts";
@@ -195,7 +195,7 @@ function Editor({ onLogout }) {
     themes: <ThemesPanel draft={draft} patch={patch} />,
     fonts: <FontsPanel draft={draft} patch={patch} />,
     announcement: <AnnouncementPanel draft={draft} patch={patch} />,
-    ads: <AdsPanel draft={draft} patch={patch} />,
+    ads: <AdsPanel draft={draft} patch={patch} path={path} />,
     navigation: <NavPanel draft={draft} patch={patch} />,
     footer: <FooterPanel draft={draft} patch={patch} />,
     home: <HomePanel draft={draft} patch={patch} />,
@@ -247,13 +247,29 @@ function Editor({ onLogout }) {
           </button>
         </div>
       </div>
-      {previewOpen && <Preview draft={draft} path={path} setPath={setPath} />}
+      {previewOpen && (
+        <Preview
+          draft={draft}
+          path={path}
+          setPath={setPath}
+          onAdChange={(change) => patch((next) => {
+            const ad = (next.ads || []).find((item) => item.id === change.id);
+            if (!ad) return;
+            if (typeof change.place === "string") ad.place = change.place;
+            if (change.edge === "before" || change.edge === "after") ad.edge = change.edge;
+            if (Number.isFinite(change.w)) ad.w = change.w;
+            if (Number.isFinite(change.h)) ad.h = change.h;
+          })}
+        />
+      )}
     </div>
   );
 }
 
-function Preview({ draft, path, setPath }) {
+function Preview({ draft, path, setPath, onAdChange }) {
   const frame = useRef(null);
+  const onAdChangeRef = useRef(onAdChange);
+  onAdChangeRef.current = onAdChange;
   const origin = window.location.origin;
   const tool = draft.tools?.find((item) => item.visible !== false && item.slug);
   const guide = draft.guides?.find((item) => item.visible !== false && item.slug);
@@ -265,7 +281,12 @@ function Preview({ draft, path, setPath }) {
   useEffect(() => {
     publish();
     function onMessage(event) {
-      if (event.origin !== origin || event.data?.type !== "buyzaar-preview-ready") return;
+      if (event.origin !== origin || !event.data) return;
+      if (event.data.type === "buyzaar-ad-layout") {
+        onAdChangeRef.current?.(event.data);
+        return;
+      }
+      if (event.data.type !== "buyzaar-preview-ready") return;
       publish(frame.current);
       frame.current?.contentWindow?.postMessage({ type: "buyzaar-preview-go", path }, origin);
     }
@@ -720,12 +741,13 @@ function AnnouncementPanel({ draft, patch }) {
   );
 }
 
-function AdsPanel({ draft, patch }) {
+function AdsPanel({ draft, patch, path }) {
   const clashes = clashPages(draft.ads);
+  const page = pageKey(path) || "home";
   return (
     <div>
       <h1>Ads</h1>
-      <p className="fine">Paste an embed, tick the pages, and choose where it sits. It scrolls with the page. The first switched-on ad for a page is the one that runs, so two embeds do not share one options object. Buyzaar does not click ads.</p>
+      <p className="fine">Add an ad and it shows in the preview. Drag it onto a section, then drag the corner to set the width and height. It scrolls with that section. The first switched-on ad for a page is the one that runs. Buyzaar does not click ads.</p>
       {clashes.length > 0 && <p className="aerror">More than one ad is on: {clashes.join(", ")}. Only the first is shown.</p>}
       {(draft.ads || []).map((ad, index) => (
         <div className="pair" key={ad.id}>
@@ -769,7 +791,7 @@ function AdsPanel({ draft, patch }) {
           <IconBtn label="Remove ad" onClick={() => patch((next) => { next.ads.splice(index, 1); })}>✕</IconBtn>
         </div>
       ))}
-      <button type="button" className="btn btn-line" onClick={() => patch((next) => next.ads.push({ id: uid("ad"), name: "New ad", script: "", show: false, pages: ["home"], place: "", edge: "after", w: 100, h: 220 }))}>
+      <button type="button" className="btn btn-line" onClick={() => patch((next) => next.ads.push({ id: uid("ad"), name: "New ad", script: "", show: true, pages: [page], place: "", edge: "after", w: 100, h: 220 }))}>
         Add ad
       </button>
     </div>
