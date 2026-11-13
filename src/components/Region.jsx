@@ -3,34 +3,39 @@ import { useLocation } from "react-router-dom";
 import { useCatalog } from "../catalog/context";
 import { adOnPage, pageKey } from "../data/ads";
 
+function pageAds(content, pathname) {
+  const editing = window.parent !== window;
+  const page = pageKey(pathname);
+  const ads = (content?.ads || []).filter((item) => item.show && adOnPage(item, page) && (editing || String(item.script || "").trim()));
+  return { ads, editing, page };
+}
+
 export function usePageAd() {
   const { content } = useCatalog();
   const { pathname } = useLocation();
-  const editing = window.parent !== window;
-  const page = pageKey(pathname);
-  const ad = (content?.ads || []).find((item) => item.show && adOnPage(item, page) && (editing || String(item.script || "").trim()));
-  return { ad, editing, page };
+  return pageAds(content, pathname);
 }
 
 export function Region({ id, children }) {
-  const { ad, editing } = usePageAd();
-  const before = ad && ad.place === id && ad.edge === "before";
-  const after = ad && ad.place === id && ad.edge !== "before";
+  const { ads, editing } = usePageAd();
+  const before = ads.filter((ad) => ad.place === id && ad.edge === "before");
+  const after = ads.filter((ad) => ad.place === id && ad.edge !== "before");
   return (
     <div className="region" data-region={id}>
-      {before ? <AdBox ad={ad} editing={editing} /> : null}
+      {before.map((ad) => <AdBox key={ad.id} ad={ad} editing={editing} />)}
       {children}
-      {after ? <AdBox ad={ad} editing={editing} /> : null}
+      {after.map((ad) => <AdBox key={ad.id} ad={ad} editing={editing} />)}
     </div>
   );
 }
 
 export function AdInbox({ place }) {
-  const { ad, editing } = usePageAd();
-  const loose = ad && !ad.place;
-  if (place === "edit" && !(editing && loose)) return null;
-  if (place === "live" && !(!editing && loose)) return null;
-  return <AdBox ad={ad} editing={editing} />;
+  const { ads, editing } = usePageAd();
+  const loose = ads.filter((ad) => !ad.place);
+  if (place === "edit" && !editing) return null;
+  if (place === "live" && editing) return null;
+  if (!loose.length) return null;
+  return loose.map((ad) => <AdBox key={ad.id} ad={ad} editing={editing} />);
 }
 
 function report(ad, detail) {

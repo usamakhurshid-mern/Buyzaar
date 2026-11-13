@@ -742,13 +742,11 @@ function AnnouncementPanel({ draft, patch }) {
 }
 
 function AdsPanel({ draft, patch, path }) {
-  const clashes = clashPages(draft.ads);
   const page = pageKey(path) || "home";
   return (
     <div>
       <h1>Ads</h1>
-      <p className="fine">Add an ad and it shows in the preview. Drag it onto a section, then drag the corner to set the width and height. It scrolls with that section. The first switched-on ad for a page is the one that runs. Buyzaar does not click ads.</p>
-      {clashes.length > 0 && <p className="aerror">More than one ad is on: {clashes.join(", ")}. Only the first is shown.</p>}
+      <p className="fine">Add an ad and it shows in the preview. Every ad you switch on for a page is shown. Drag each one onto a section, then drag the corner to set the width and height. It scrolls with that section. Buyzaar does not click ads.</p>
       {(draft.ads || []).map((ad, index) => (
         <div className="pair" key={ad.id}>
           <Text label="Name" value={ad.name} onChange={(value) => patch((next) => { next.ads[index].name = value; })} />
@@ -1100,16 +1098,6 @@ function IconBtn({ label, onClick, children }) {
       {children}
     </button>
   );
-}
-
-function clashPages(ads) {
-  const counts = {};
-  (ads || []).filter((ad) => ad.show).forEach((ad) => {
-    (ad.pages || []).forEach((page) => {
-      counts[page] = (counts[page] || 0) + 1;
-    });
-  });
-  return Object.entries(counts).filter(([, count]) => count > 1).map(([page]) => page);
 }
 
 function toColor(value) {
