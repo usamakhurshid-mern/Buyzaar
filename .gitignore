@@ -1,0 +1,4 @@
+node_modules
+dist
+admin.secret.json
+.DS_Store
