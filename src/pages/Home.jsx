@@ -11,7 +11,6 @@ export default function Home() {
   const vars = brandVars(content);
   const home = content.home;
   useSeo(content, { path: "/" });
-  const stage = featuredTools(content).slice(0, 4);
   const align = content.layout?.bannerAlign || "left";
   const heroHeight = Math.max(0, Math.round(Number(content.layout?.heroHeight) || 0));
 
@@ -19,7 +18,10 @@ export default function Home() {
     <div className="page home">
       {home.hero.show && (
         <Region id="home-hero">
-          <section className={`hero align-${align} ${heroHeight ? "is-sized" : ""}`} style={heroHeight ? { "--hero-h": `${heroHeight}px` } : undefined}>
+          <section className={`hero hero-banner align-${align} ${heroHeight ? "is-sized" : ""}`} style={heroHeight ? { "--hero-h": `${heroHeight}px` } : undefined}>
+            <div className="hero-media" aria-hidden="true">
+              <img src="/hero/desk.jpg" alt="" />
+            </div>
             <div className="hero-copy">
               {home.hero.eyebrow && <p className="eyebrow">{fill(home.hero.eyebrow, vars)}</p>}
               <h1>
@@ -56,14 +58,20 @@ export default function Home() {
                 </ul>
               )}
             </div>
-            {home.hero.showStage && stage.length > 0 && (
-              <div className="cluster" aria-label="Featured tools">
-                {stage.map((tool) => (
-                  <Link key={tool.slug} to={`/tools/${tool.slug}`} className="tile" style={{ "--tone": tool.tone }}>
-                    <span>{categoryById(content, tool.category)?.name}</span>
-                    <strong>{tool.name}</strong>
-                  </Link>
-                ))}
+            {home.hero.showStage && (
+              <div className="hero-float" aria-label="Compare phones, laptops, and audio">
+                <Link className="float-shot shot-phone" to="/shop?category=phones">
+                  <img src="/hero/phone.jpg" alt="" />
+                  <span>Phones</span>
+                </Link>
+                <Link className="float-shot shot-laptop" to="/shop?category=laptops">
+                  <img src="/hero/laptop.jpg" alt="" />
+                  <span>Laptops</span>
+                </Link>
+                <Link className="float-shot shot-buds" to="/shop?category=audio">
+                  <img src="/hero/buds.jpg" alt="" />
+                  <span>Audio</span>
+                </Link>
               </div>
             )}
           </section>
