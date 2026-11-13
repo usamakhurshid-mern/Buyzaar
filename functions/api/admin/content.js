@@ -8,6 +8,6 @@ export async function onRequestPost({ request, env }) {
   if (!Array.isArray(body.tools) || !Array.isArray(body.categories)) {
     return json(400, { error: "The draft is missing tools or categories." });
   }
-  await env.BUYZAAR.put("content", JSON.stringify(body));
+  await env.STORE.put("content", JSON.stringify(body));
   return json(200, { ok: true });
 }

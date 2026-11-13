@@ -137,7 +137,7 @@ export function CatalogProvider({ children }) {
     });
     if (!response.ok) {
       const payload = await response.json().catch(() => ({}));
-      const error = new Error(payload.error || "Save failed. Keep npm run dev running, then try again.");
+      const error = new Error(payload.error || "The live admin API failed.");
       error.status = response.status;
       throw error;
     }

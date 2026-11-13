@@ -7,6 +7,6 @@ export async function onRequestPost({ request, env }) {
   if (auth.error) return auth.error;
   const next = String(body.password || "").trim();
   if (next.length < 4) return json(400, { error: "Use at least 4 characters." });
-  await env.BUYZAAR.put("password", next);
+  await env.STORE.put("password", next);
   return json(200, { ok: true });
 }

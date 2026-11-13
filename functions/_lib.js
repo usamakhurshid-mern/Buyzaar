@@ -1,4 +1,4 @@
-const DEFAULT_PASSWORD = "buyzaar";
+const STARTER = "buyzaar";
 
 export function json(status, payload) {
   return new Response(JSON.stringify(payload), {
@@ -11,23 +11,22 @@ export function json(status, payload) {
 }
 
 export function requireStore(env) {
-  if (!env.BUYZAAR) {
-    return json(503, {
-      error: "Admin storage is not connected. In Cloudflare Pages, open Settings, Functions, KV namespace bindings, and bind a namespace as BUYZAAR.",
-    });
-  }
+  if (!env.STORE) return json(500, { error: "Admin storage is not connected." });
   return null;
 }
 
 export function samePassword(sent, expected) {
   const typed = String(sent || "").trim();
   const stored = String(expected || "").trim();
-  return typed.length > 0 && typed === stored;
+  return typed.length > 0 && typed.toLowerCase() === stored.toLowerCase();
 }
 
 export async function readPassword(env) {
-  const stored = await env.BUYZAAR.get("password");
-  return String(stored || DEFAULT_PASSWORD).trim();
+  const fromKv = String((await env.STORE.get("password")) || "").trim();
+  if (fromKv) return fromKv;
+  const fromSecret = String(env.ADMIN_PASSWORD || "").trim();
+  if (fromSecret) return fromSecret;
+  return STARTER;
 }
 
 export async function readBody(request) {

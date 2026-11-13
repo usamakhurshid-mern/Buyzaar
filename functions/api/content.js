@@ -1,8 +1,8 @@
 import { json } from "../_lib.js";
 
 export async function onRequestGet({ env }) {
-  if (!env.BUYZAAR) return json(404, { error: "No saved content yet." });
-  const raw = await env.BUYZAAR.get("content");
+  if (!env.STORE) return json(404, { error: "No saved content yet." });
+  const raw = await env.STORE.get("content");
   if (!raw) return json(404, { error: "No saved content yet." });
   return new Response(raw, {
     status: 200,

@@ -90,14 +90,14 @@ function Login({ onSuccess, notice }) {
         setError(payload.error || "Wrong password.");
         return;
       }
-      if (!response.ok) {
-        setError(payload.error || "Sign-in needs the admin API. Locally, keep npm run dev running.");
+      if (!response.ok || payload.ok !== true) {
+        setError(payload.error || "The live admin API failed.");
         return;
       }
       sessionStorage.setItem(ADMIN_KEY, typed);
       onSuccess();
     } catch {
-      setError("The admin save service is not running. Start the site with npm run dev.");
+      setError("The live admin API failed.");
     } finally {
       setPending(false);
     }
