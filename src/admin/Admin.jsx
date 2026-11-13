@@ -85,12 +85,13 @@ function Login({ onSuccess, notice }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: typed }),
       });
+      const payload = await response.json().catch(() => ({}));
       if (response.status === 401) {
-        setError("Wrong password.");
+        setError(payload.error || "Wrong password.");
         return;
       }
       if (!response.ok) {
-        setError("Open the admin while npm run dev is running.");
+        setError(payload.error || "Sign-in needs the admin API. Locally, keep npm run dev running.");
         return;
       }
       sessionStorage.setItem(ADMIN_KEY, typed);
@@ -599,7 +600,7 @@ function BrandPanel({ draft, patch, onLogout }) {
     }
     sessionStorage.setItem(ADMIN_KEY, password.trim());
     setPassword("");
-    setNote("Password changed for this computer.");
+    setNote("Password changed.");
   }
 
   return (

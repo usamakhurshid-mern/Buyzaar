@@ -6,6 +6,21 @@ import { ADMIN_KEY, normalize } from "../data/store";
 import SiteSkeleton from "../components/SiteSkeleton";
 import { CatalogContext, useCatalog } from "./context";
 
+async function loadPublished() {
+  try {
+    const live = await fetch("/api/content", { cache: "no-store" });
+    if (live.ok) {
+      const data = await live.json();
+      if (data && Array.isArray(data.tools) && Array.isArray(data.categories)) return data;
+    }
+  } catch {
+    // Fall through to the static file.
+  }
+  const response = await fetch("/content.json", { cache: "no-store" });
+  if (!response.ok) return null;
+  return response.json();
+}
+
 const themeVars = {
   bg: "--bg",
   ink: "--ink",
@@ -95,8 +110,7 @@ export function CatalogProvider({ children }) {
   useEffect(() => {
     if (preview) return undefined;
     let cancel = false;
-    fetch("/content.json", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
+    loadPublished()
       .then((data) => {
         if (!cancel) setContent(normalize(data));
       })
