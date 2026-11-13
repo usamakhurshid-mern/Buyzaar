@@ -45,7 +45,7 @@ function adminPath(req) {
 function samePassword(sent, expected) {
   const typed = String(sent || "").trim();
   const stored = String(expected || "").trim();
-  return typed.length > 0 && typed === stored;
+  return typed.length > 0 && typed.toLowerCase() === stored.toLowerCase();
 }
 
 function adminApi() {
@@ -69,9 +69,9 @@ async function handle(root, req, res) {
 
   const secretFile = path.join(root, "admin.secret.json");
   if (!fs.existsSync(secretFile)) {
-    fs.writeFileSync(secretFile, JSON.stringify({ password: "buyzaar" }, null, 2));
+    fs.writeFileSync(secretFile, JSON.stringify({ password: "mirra" }, null, 2));
   }
-  const secret = readJson(secretFile, { password: "buyzaar" });
+  const secret = readJson(secretFile, { password: "mirra" });
   const body = await readBody(req);
   const url = adminPath(req);
   const sent = String(req.headers["x-admin-key"] || (url === "/login" ? body.password : "")).trim();
@@ -83,7 +83,7 @@ async function handle(root, req, res) {
   }
 
   if (!samePassword(sent, secret.password)) {
-    send(res, 401, { error: "Your session expired. Sign in again." });
+    send(res, 401, { error: "Wrong password." });
     return;
   }
 
